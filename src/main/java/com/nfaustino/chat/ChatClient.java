@@ -18,14 +18,19 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
 
 public class ChatClient {
 	MulticastSocket multicastSocket;
 	DatagramSocket datagramSocket;
 	InetAddress group;
+
 	int portMultcast;
 	int portUdp;
+	
 	String username;
+
+	ArrayList<User> usersOnline = new ArrayList<>();
 
 	public ChatClient() {
 		this.multicastSocket = null;
@@ -47,10 +52,15 @@ public class ChatClient {
 
 	// --------------- GET SET ------------------
 
-	String getUsername() { return this.username; }
-	void setUsername(String username) { this.username = username; }
+	public String getUsername() { return this.username; }
+	public void setUsername(String username) { this.username = username; }
 
-	MulticastSocket getMulticastSocket() { return this.multicastSocket; }
+	public MulticastSocket getMulticastSocket() { return this.multicastSocket; }
+	public DatagramSocket getDatagramSocket() { return this.datagramSocket; }
+
+	public ArrayList<User> getUsersOnline() { return this.usersOnline; }
+	public void addUserOnline(User user) { this.usersOnline.add(user); }
+	public void deleteUserOnline(User user) { this.usersOnline.remove(user); }
 
 	// ------------------------------------------
 
@@ -88,13 +98,14 @@ public class ChatClient {
 	void execute() {
 		try {
 			Thread sendMessage = new Thread(new SendRunnable(this));
-			
-			Thread t = new Thread(new ReciveMulticastRunnable(this));
+			Thread reciveMulticast = new Thread(new ReciveMulticastRunnable(this));
+			Thread reciveDatagram = new Thread(new ReciveUdpRunnable(this));
 
-			t.start();
+			reciveMulticast.start();
+			reciveDatagram.start();
 			sendMessage.start();
 
-			while(t.isAlive()) Thread.sleep(500);
+			while(reciveMulticast.isAlive()) Thread.sleep(500);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -112,6 +123,30 @@ public class ChatClient {
 			e.printStackTrace();
 		}
 	}
+
+	public void sendDatagram(String msg, InetAddress ip) {
+		byte[] msgByte = msg.getBytes();
+		DatagramPacket msgOut = new DatagramPacket(msgByte, msgByte.length, ip, this.portUdp);
+
+		try {
+			this.datagramSocket.send(msgOut);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendDatagram(String msg, InetAddress ip, int port){
+		byte[] msgByte = msg.getBytes();
+		DatagramPacket msgOut = new DatagramPacket(msgByte, msgByte.length, ip, port);
+
+		try {
+			this.datagramSocket.send(msgOut);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
 	public static void main(String[] args) {
 		ChatClient client = new ChatClient();
 		client.execute();

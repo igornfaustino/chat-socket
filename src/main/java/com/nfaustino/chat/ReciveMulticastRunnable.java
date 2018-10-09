@@ -8,6 +8,7 @@
 package com.nfaustino.chat;
 
 import java.net.DatagramPacket;
+import java.util.ArrayList;
 
 public class ReciveMulticastRunnable implements Runnable {
 	ChatClient chatClient;
@@ -29,14 +30,16 @@ public class ReciveMulticastRunnable implements Runnable {
 				// Test if command is a join
 				if (cmdToken[0].equals("JOIN")) {
 					String newUser = "";
-					for(int i = 1; i < cmdToken.length; i++){
+					for(int i = 2; i < cmdToken.length; i++){
 						newUser = newUser.concat(cmdToken[i] + " ");
 					}
 					newUser = newUser.trim();
 					
 					// test if msg is not your only username
 					if(!newUser.equals(chatClient.getUsername())){
-						System.out.println(newUser);
+						chatClient.addUserOnline(new User(newUser, msgIn.getAddress(), Integer.valueOf(cmdToken[1])));
+
+						this.chatClient.sendDatagram("JOINACK " + this.chatClient.getUsername(), msgIn.getAddress(), Integer.valueOf(cmdToken[1]));
 					}
 				}
 				

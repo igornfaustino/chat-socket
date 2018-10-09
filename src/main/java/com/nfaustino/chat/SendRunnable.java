@@ -10,15 +10,9 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
 
 public class SendRunnable implements Runnable {
-	MulticastSocket multicastSocket;
-	InetAddress groupIp;
-	int portMulticast;
 	BufferedReader in;
-	StringBuilder username;
 	ChatClient chatClient;
 
 	public SendRunnable(ChatClient chatClient) {
@@ -30,7 +24,7 @@ public class SendRunnable implements Runnable {
 		System.out.println("Type yout username:");
 		try {
 			chatClient.setUsername(in.readLine().trim());
-			chatClient.sendMulticast("JOIN " + chatClient.getUsername());
+			chatClient.sendMulticast("JOIN " + chatClient.portUdp + " " + chatClient.getUsername());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
