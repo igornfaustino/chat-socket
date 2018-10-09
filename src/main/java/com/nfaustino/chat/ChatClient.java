@@ -39,7 +39,7 @@ public class ChatClient {
 			byte[] msg = "teste".getBytes();
 			DatagramPacket msgOut = new DatagramPacket(msg, msg.length, this.group, 6789);
 			this.multicastSocket.send(msgOut);
-			Thread t = new Thread(new reciveRunnable(multicastSocket, running));
+			Thread t = new Thread(new ReciveRunnable(multicastSocket, running));
 			t.start();
 
 			while(t.isAlive()) {

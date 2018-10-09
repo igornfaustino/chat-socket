@@ -8,14 +8,13 @@
 package com.nfaustino.chat;
 
 import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-public class reciveRunnable implements Runnable {
+public class ReciveRunnable implements Runnable {
 	MulticastSocket multicastSocket;
 	Boolean running;
 
-	public reciveRunnable(MulticastSocket multicastSocket, Boolean running) {
+	public ReciveRunnable(MulticastSocket multicastSocket, Boolean running) {
 			this.multicastSocket = multicastSocket;
 			this.running = running;
 	}
