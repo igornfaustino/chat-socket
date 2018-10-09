@@ -3,42 +3,93 @@
  * create at october 9 2018
  * 
  * Multicast chat client
+ * 
+ * Multicas Ip -> 255.1.2.3
+ * Multicast port -> 6789
+ * UDP port -> 6799?
  */
 
 package com.nfaustino.chat;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
 
 public class ChatClient {
 	MulticastSocket multicastSocket;
+	DatagramSocket datagramSocket;
 	InetAddress group;
 	int portMultcast;
-	Boolean running = Boolean.TRUE;
-	StringBuilder username = new StringBuilder();
+	int portUdp;
+	String username;
 
 	public ChatClient() {
 		this.multicastSocket = null;
+		this.datagramSocket = null;
+
 		this.portMultcast = 6789;
+		this.portUdp = 6799;
+
 		try {
 			this.group = InetAddress.getByName("225.1.2.3");
 		} catch (IOException e) {
 			System.out.println("IO: " + e.getMessage());
 		}
+
+		initializeMulticastSocket();
+		initializeDatagramSocket();
 		System.out.println("initializing chat....");
 	}
+
+	// --------------- GET SET ------------------
+
+	String getUsername() { return this.username; }
+	void setUsername(String username) { this.username = username; }
+
+	MulticastSocket getMulticastSocket() { return this.multicastSocket; }
+
+	// ------------------------------------------
+
+	// --------------- INITIALIZE ---------------
+
+	void initializeMulticastSocket() {
+		try {
+			this.multicastSocket = new MulticastSocket(this.portMultcast);
+			this.multicastSocket.joinGroup(this.group); // connect client to the multicast group
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	void initializeDatagramSocket() {
+		boolean error;
+		do {
+			error = false;
+			try {
+				this.datagramSocket = new DatagramSocket(this.portUdp);
+			} catch (BindException e) {
+				error = true;
+				this.portUdp++;
+			} catch (SocketException e) {
+				e.printStackTrace();
+			}
+		} while (error);
+	}
+
+	// -----------------------------------------
 
 	/**
 	 * starts the client
 	 */
 	void execute() {
 		try {
-			this.multicastSocket = new MulticastSocket(this.portMultcast);
-			this.multicastSocket.joinGroup(this.group); // connect client to the multicast group
-			Thread sendMessage = new Thread(new SendRunnable(this.multicastSocket, this.group, this.portMultcast, this.username));
-			Thread t = new Thread(new ReciveRunnable(this.multicastSocket, this.username));
+			Thread sendMessage = new Thread(new SendRunnable(this));
+			
+			Thread t = new Thread(new ReciveMulticastRunnable(this));
 
 			t.start();
 			sendMessage.start();
@@ -48,10 +99,19 @@ public class ChatClient {
 			e.printStackTrace();
 		} finally {
 			if (this.multicastSocket != null) this.multicastSocket.close();
-			System.out.println(running);
 		}
 	}
 
+	public void sendMulticast(String msg) {
+		byte[] msgByte = msg.getBytes();
+		DatagramPacket msgOut = new DatagramPacket(msgByte, msgByte.length, this.group, this.portMultcast);
+
+		try {
+			this.multicastSocket.send(msgOut);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public static void main(String[] args) {
 		ChatClient client = new ChatClient();
 		client.execute();
