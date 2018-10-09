@@ -8,7 +8,6 @@
 package com.nfaustino.chat;
 
 import java.net.DatagramPacket;
-import java.util.ArrayList;
 
 public class ReciveMulticastRunnable implements Runnable {
 	ChatClient chatClient;
