@@ -1,6 +1,6 @@
 /**
  * @author Igor N Faustino, Claudia Sampedro
- * create at octuber 9 2018
+ * create at october 9 2018
  * 
  * Multicast chat client
  */
@@ -17,6 +17,7 @@ public class ChatClient {
 	InetAddress group;
 	int portMultcast;
 	Boolean running = Boolean.TRUE;
+	StringBuilder username = new StringBuilder();
 
 	public ChatClient() {
 		this.multicastSocket = null;
@@ -36,15 +37,13 @@ public class ChatClient {
 		try {
 			this.multicastSocket = new MulticastSocket(this.portMultcast);
 			this.multicastSocket.joinGroup(this.group); // connect client to the multicast group
-			byte[] msg = "teste".getBytes();
-			DatagramPacket msgOut = new DatagramPacket(msg, msg.length, this.group, 6789);
-			this.multicastSocket.send(msgOut);
-			Thread t = new Thread(new ReciveRunnable(multicastSocket, running));
-			t.start();
+			Thread sendMessage = new Thread(new SendRunnable(this.multicastSocket, this.group, this.portMultcast, this.username));
+			Thread t = new Thread(new ReciveRunnable(this.multicastSocket, this.username));
 
-			while(t.isAlive()) {
-				Thread.sleep(500);
-			}
+			t.start();
+			sendMessage.start();
+
+			while(t.isAlive()) Thread.sleep(500);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
