@@ -29,6 +29,7 @@ public class ChatClient {
 	int portUdp;
 	
 	String username;
+	boolean running = true;
 
 	ArrayList<User> usersOnline = new ArrayList<>();
 
@@ -61,6 +62,9 @@ public class ChatClient {
 	public ArrayList<User> getUsersOnline() { return this.usersOnline; }
 	public void addUserOnline(User user) { this.usersOnline.add(user); }
 	public void deleteUserOnline(User user) { this.usersOnline.remove(user); }
+	
+	public boolean isRunning() { return this.running; }
+	public void setRunning(boolean running) { this.running = running; }
 
 	// ------------------------------------------
 

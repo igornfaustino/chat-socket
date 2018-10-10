@@ -18,7 +18,7 @@ public class ReciveMulticastRunnable implements Runnable {
 	
 	public void run() {
 		try {
-			while(true){
+			while(this.chatClient.isRunning()){
 				byte[] buffer = new byte[1000];
 				DatagramPacket msgIn = new DatagramPacket(buffer, buffer.length);
 				chatClient.getMulticastSocket().receive(msgIn);

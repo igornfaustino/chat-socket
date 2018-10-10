@@ -17,7 +17,7 @@ public class ReciveUdpRunnable implements Runnable {
 	}
 	
 	public void run() {
-		while(true) {
+		while(this.chatClient.isRunning()) {
 			byte[] buffer = new byte[1000];
 			DatagramPacket recivPacket = new DatagramPacket(buffer, buffer.length);
 			try {

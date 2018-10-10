@@ -48,7 +48,7 @@ public class SendRunnable implements Runnable {
 
 	void mainLoop() {
 		System.out.println("you enter in the chat room... type help to see all the commands");
-		while(true) {
+		while(this.chatClient.isRunning()) {
 			String line = readLine("\n>>> ").trim();
 			
 			String[] cmdTokens = line.split(" ");
