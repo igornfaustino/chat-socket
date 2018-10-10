@@ -28,18 +28,17 @@ public class ReciveMulticastRunnable implements Runnable {
 
 				// Test if command is a join
 				if (cmdToken[0].equals("JOIN")) {
-					String newUser = "";
-					for(int i = 2; i < cmdToken.length; i++){
-						newUser = newUser.concat(cmdToken[i] + " ");
-					}
+					String newUser = Util.extractUsername(msgRecive);
 					newUser = newUser.trim();
 					
 					// test if msg is not your only username
 					if(!newUser.equals(chatClient.getUsername())){
 						chatClient.addUserOnline(new User(newUser, msgIn.getAddress(), Integer.valueOf(cmdToken[1])));
 
-						this.chatClient.sendDatagram("JOINACK " + this.chatClient.getUsername(), msgIn.getAddress(), Integer.valueOf(cmdToken[1]));
+						this.chatClient.sendDatagram("JOINACK [" + this.chatClient.getUsername() + "]", msgIn.getAddress(), Integer.valueOf(cmdToken[1]));
 					}
+				} else if (cmdToken[0].equalsIgnoreCase("msg")){
+					System.out.println("\n" + msgRecive.replaceAll("^.*\\[", "["));
 				}
 				
 			}

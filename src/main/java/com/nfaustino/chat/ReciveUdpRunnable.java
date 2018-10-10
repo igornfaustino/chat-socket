@@ -26,10 +26,7 @@ public class ReciveUdpRunnable implements Runnable {
 				String[] cmdToken = msg.trim().split(" ");
 
 				if (cmdToken[0].equals("JOINACK")) {
-					String newUser = "";
-					for(int i = 2; i < cmdToken.length; i++){
-						newUser = newUser.concat(cmdToken[i] + " ");
-					}
+					String newUser = Util.extractUsername(msg);
 					newUser = newUser.trim();
 
 					chatClient.addUserOnline(new User(newUser,
