@@ -32,6 +32,8 @@ public class ReciveUdpRunnable implements Runnable {
 					chatClient.addUserOnline(new User(newUser,
 											 recivPacket.getAddress(),
 											 recivPacket.getPort()));
+				} else if (cmdToken[0].equals("MSGIDV")){
+					System.out.println(msg);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

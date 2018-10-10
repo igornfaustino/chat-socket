@@ -40,7 +40,6 @@ public class ReciveMulticastRunnable implements Runnable {
 				} else if (cmdToken[0].equalsIgnoreCase("msg")){
 					System.out.println("\n" + msgRecive.replaceAll("^.*\\[", "["));
 				}
-				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
