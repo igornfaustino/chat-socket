@@ -24,12 +24,12 @@ public class MyFile {
     }
 
     public Boolean fileExist(String path) {
-        File f = new File(path);
+        File f = new File(this.dirPath + "/" + path);
         return (f.exists() && !f.isDirectory());
     }
 
     public byte[] getFile(String path) {
-        File f = new File(this.dirPath + path);
+        File f = new File(this.dirPath + "/" + path);
         byte[] bytesArray = new byte[(int) f.length()];
         try {
             FileInputStream fis = new FileInputStream(f);

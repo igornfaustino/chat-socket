@@ -17,16 +17,19 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
 public class ChatClient {
 	MulticastSocket multicastSocket;
 	DatagramSocket datagramSocket;
+	ServerSocket serverSocket;
 	InetAddress group;
 
 	int portMultcast;
 	int portUdp;
+	int portTcp;
 	
 	String username;
 	boolean running = true;
@@ -39,6 +42,7 @@ public class ChatClient {
 
 		this.portMultcast = 6789;
 		this.portUdp = 6799;
+		this.portTcp = 7777;
 
 		try {
 			this.group = InetAddress.getByName("225.1.2.3");
@@ -48,6 +52,8 @@ public class ChatClient {
 
 		initializeMulticastSocket();
 		initializeDatagramSocket();
+		initializeServerSocket();
+
 		System.out.println("initializing chat....");
 	}
 
@@ -58,6 +64,7 @@ public class ChatClient {
 
 	public MulticastSocket getMulticastSocket() { return this.multicastSocket; }
 	public DatagramSocket getDatagramSocket() { return this.datagramSocket; }
+	public ServerSocket getServerSocket() { return this.serverSocket; }
 
 	public ArrayList<User> getUsersOnline() { return this.usersOnline; }
 	public void addUserOnline(User user) { this.usersOnline.add(user); }
@@ -94,6 +101,23 @@ public class ChatClient {
 		} while (error);
 	}
 
+	void initializeServerSocket() {
+		boolean error;
+		do {
+			error = false;
+			try {
+				this.serverSocket = new ServerSocket(this.portTcp);
+			} catch (BindException e) {
+				error = true;
+				this.portTcp++;
+			} catch (SocketException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} while (error);
+	}
+
 	// -----------------------------------------
 
 	/**
@@ -104,10 +128,12 @@ public class ChatClient {
 			Thread sendMessage = new Thread(new SendRunnable(this));
 			Thread reciveMulticast = new Thread(new ReciveMulticastRunnable(this));
 			Thread reciveDatagram = new Thread(new ReciveUdpRunnable(this));
+			Thread tcpServer = new Thread(new TcpRunnable(this));
 
 			reciveMulticast.start();
 			reciveDatagram.start();
 			sendMessage.start();
+			tcpServer.start();
 
 			while(reciveMulticast.isAlive()) Thread.sleep(500);
 		} catch (Exception e) {

@@ -7,7 +7,11 @@
 
  package com.nfaustino.chat;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.Socket;
 
 public class ReciveUdpRunnable implements Runnable {
 	ChatClient chatClient;
@@ -58,6 +62,25 @@ public class ReciveUdpRunnable implements Runnable {
 					} else {
 						System.out.println("No files avaliable");
 					}
+				} else if (cmdToken[0].equals("DOWNFILE")) {
+					initializeFile();
+					String filename = msg.replaceAll("^.*\\]", "").trim();
+					if(file.fileExist(filename)){
+						int filesize = file.getFile(filename).length;
+						this.chatClient.sendDatagram("DOWNINFO [" + filename + "," + filesize + "," + InetAddress.getLocalHost().getHostAddress() + "," + this.chatClient.portTcp + "]", recivPacket.getAddress(), recivPacket.getPort());
+					}
+				} else if (cmdToken[0].equals("DOWNINFO")){
+					initializeFile();
+					String content = Util.extractUsername(msg);
+					String[] contentList = content.split(",");
+
+					new Thread(new ClientTcpRunnable(
+						contentList[0], 
+						Integer.valueOf(contentList[1]).intValue(), 
+						contentList[2], 
+						Integer.valueOf(contentList[3]).intValue(),
+						file	
+					)).start();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -71,3 +94,42 @@ public class ReciveUdpRunnable implements Runnable {
 		}
 	}
  }
+
+
+class ClientTcpRunnable implements Runnable {
+	Socket socket;
+	String filename;
+	int size;
+
+	DataInputStream in;
+	DataOutputStream out;
+
+	MyFile file;
+
+	public ClientTcpRunnable(String filename, int size, String address, int port, MyFile file){
+		this.socket = null;
+		this.filename = filename;
+		this.size = size;
+		this.file = file;
+		try {
+			this.socket = new Socket(InetAddress.getByName(address), port);
+			in = new DataInputStream(this.socket.getInputStream());
+			out = new DataOutputStream(this.socket.getOutputStream());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void run() {
+		try {
+			out.writeUTF(this.filename);
+			byte[] fileByte = new byte[this.size];
+			for(int i = 0; i < fileByte.length; i++){
+				fileByte[i] = in.readByte();
+			}
+			file.saveFile(filename, fileByte);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

@@ -46,6 +46,7 @@ public class SendRunnable implements Runnable {
 		System.out.println("msg text: send the text to everyone in the chat");
 		System.out.println("msgidv [user] text: send the text to the online user. ex: msgidv [john doo] hello john");
 		System.out.println("listfiles [user]: list all user's avaliable files");
+		System.out.println("downfile [user] filename: download file");
 	}
 
 	void mainLoop() {
@@ -67,6 +68,8 @@ public class SendRunnable implements Runnable {
 				this.chatClient.setRunning(false);
 			} else if (cmdTokens[0].equalsIgnoreCase("listfiles")){
 				listFile(line);
+			} else if (cmdTokens[0].equalsIgnoreCase("downfile")){
+				downfile(line);
 			}
 			try {
 				Thread.sleep(300);
@@ -125,6 +128,24 @@ public class SendRunnable implements Runnable {
 		}
 		if (userTo != null) { 
 			this.chatClient.sendDatagram("MSGIDV FROM [" + this.chatClient.getUsername() + "] TO [" + userTo.getUsername() + "] \"" + text + "\"", userTo.getIp(), userTo.getPortUdp());
+		} else {
+			System.out.println("User is not online");
+		}
+	}
+
+	void downfile(String rawMsg) {
+		String text = rawMsg.toLowerCase().replaceAll("^.*\\]", "").trim();
+		String username = Util.extractUsername(rawMsg);
+
+		User userTo = null;
+		for(User user: this.chatClient.getUsersOnline()){
+			if (user.getUsername().equalsIgnoreCase(username)){
+				userTo = user;
+				break;
+			}
+		}
+		if (userTo != null) { 
+			this.chatClient.sendDatagram("DOWNFILE [" + this.chatClient.getUsername() + "]" + text, userTo.getIp(), userTo.getPortUdp());
 		} else {
 			System.out.println("User is not online");
 		}
