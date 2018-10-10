@@ -114,6 +114,7 @@ public class ChatClient {
 			e.printStackTrace();
 		} finally {
 			if (this.multicastSocket != null) this.multicastSocket.close();
+			if (this.datagramSocket != null) this.datagramSocket.close();
 		}
 	}
 

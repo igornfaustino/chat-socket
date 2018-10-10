@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 
 public class ReciveUdpRunnable implements Runnable {
 	ChatClient chatClient;
+	MyFile file = null;
 
 	public ReciveUdpRunnable(ChatClient chatClient) {
 		this.chatClient = chatClient;
@@ -33,11 +34,40 @@ public class ReciveUdpRunnable implements Runnable {
 											 recivPacket.getAddress(),
 											 recivPacket.getPort()));
 				} else if (cmdToken[0].equals("MSGIDV")){
-					System.out.println(msg);
+					System.out.println("\n- " + msg);
+				} else if (cmdToken[0].equals("LISTFILES")){
+					initializeFile();
+
+					String msgFile = "FILES [";
+					if(file.getFiles().length > 0){
+						for(String file : file.getFiles()){
+							msgFile += file + ",";
+						}
+						msgFile = msgFile.replaceFirst(",$", "]");
+					} else {
+						msgFile += "]";
+					}
+					this.chatClient.sendDatagram(msgFile, recivPacket.getAddress(), recivPacket.getPort());
+				} else if (cmdToken[0].equals("FILES")){
+					String files = Util.extractUsername(msg);
+					String[] listFiles = files.split(",");
+					if(!files.isEmpty()){
+						for (String file : listFiles){
+							System.out.println("- " + file);
+						}
+					} else {
+						System.out.println("No files avaliable");
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	void initializeFile() {
+		if (this.file == null) {
+			this.file = new MyFile("/home/igornfaustino/Documents/code/faculdade/6_periodo/sd/chat-socket/data/" + this.chatClient.username);
 		}
 	}
  }

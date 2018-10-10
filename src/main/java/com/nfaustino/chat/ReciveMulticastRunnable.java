@@ -33,12 +33,29 @@ public class ReciveMulticastRunnable implements Runnable {
 					
 					// test if msg is not your only username
 					if(!newUser.equals(chatClient.getUsername())){
+						System.out.println("\n- " + newUser + " enters into the chat room");
+
 						chatClient.addUserOnline(new User(newUser, msgIn.getAddress(), Integer.valueOf(cmdToken[1])));
 
 						this.chatClient.sendDatagram("JOINACK [" + this.chatClient.getUsername() + "]", msgIn.getAddress(), Integer.valueOf(cmdToken[1]));
 					}
 				} else if (cmdToken[0].equalsIgnoreCase("msg")){
 					System.out.println("\n" + msgRecive.replaceAll("^.*\\[", "["));
+				} else if (cmdToken[0].equalsIgnoreCase("leave")) {
+					String username = Util.extractUsername(msgRecive);
+					username = username.trim();
+
+					User offlineUser = null;
+					for(User user : this.chatClient.getUsersOnline()){
+						if (user.username.equalsIgnoreCase(username)){
+							offlineUser = user;
+							break;
+						}
+					}
+					if (offlineUser != null) { 
+						System.out.println("[" + username + "] leave the chat room");
+						this.chatClient.deleteUserOnline(offlineUser);
+					}
 				}
 			}
 		} catch (Exception e) {
